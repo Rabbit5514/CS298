@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Rodrigo Sanchez Ocegueda" />
+  <title>Multi-Agent Game Theory and Deep Q-Learning</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:   #1a4731;
+      --green-mid:    #2d6a4f;
+      --green-accent: #40916c;
+      --green-light:  #d8f3dc;
+      --green-pale:   #f0faf2;
+      --text-main:    #1b2d24;
+      --text-muted:   #4a6558;
+      --border:       #b7dfc4;
+    }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--text-main);
+      background: #f7faf8;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--green-dark);
+      color: #ffffff;
+      padding: 4rem 2rem 3.5rem;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      display: block;
+      height: 5px;
+      background: linear-gradient(90deg, var(--green-accent), #52b788, var(--green-accent));
+    }
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header-meta {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #95d5b2;
+      margin-bottom: 1rem;
+    }
+    header h1 {
+      font-size: 2.6rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1.3rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    header p {
+      font-size: 1.05rem;
+      color: #cde9d8;
+      max-width: 700px;
+      line-height: 1.8;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* ── PAGE WRAPPER ── */
+    .page-wrap {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 0 2rem 5rem;
+    }
+
+    /* ── OVERVIEW ── */
+    .overview-block {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2.2rem 2.4rem;
+      margin: 3rem 0;
+    }
+    .overview-block h2 {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--green-mid);
+      margin-bottom: 0.8rem;
+    }
+    .overview-intro {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 1.6rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      border-top: 3px solid var(--green-accent);
+      border-radius: 4px;
+      padding: 1.1rem 1.2rem;
+      background: var(--green-pale);
+      font-size: 0.9rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 0.55rem;
+    }
+
+    /* ── GAME SECTIONS ── */
+    .game-section {
+      margin: 3.5rem 0 0;
+    }
+    .game-tag {
+      display: inline-block;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: var(--green-accent);
+      color: #ffffff;
+      padding: 0.2rem 0.65rem;
+      border-radius: 2px;
+      margin-bottom: 0.7rem;
+    }
+    h2 {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-bottom: 0.7rem;
+      border-bottom: 2px solid var(--green-light);
+      padding-bottom: 0.5rem;
+    }
+    .section-intro {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      max-width: 760px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* ── SPEC TABLE ── */
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0 2rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.9rem;
+    }
+    .spec-table tr {
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-table tr:last-child {
+      border-bottom: none;
+    }
+    .spec-table td:first-child {
+      font-weight: 700;
+      color: var(--green-mid);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      width: 115px;
+      padding: 0.75rem 1rem 0.75rem 0;
+      vertical-align: top;
+    }
+    .spec-table td:last-child {
+      color: var(--text-main);
+      padding: 0.75rem 0;
+      line-height: 1.6;
+    }
+    .spec-table-wrap {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 1.4rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    /* ── EXPERIMENT BLOCKS ── */
+    .experiment {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.8rem 2rem;
+      margin: 1.8rem 0;
+    }
+    .exp-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .exp-number {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--green-light);
+      line-height: 1;
+      min-width: 2rem;
+    }
+    h3 {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      line-height: 1.3;
+    }
+    .experiment p {
+      font-size: 0.97rem;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      max-width: 760px;
+    }
+    .experiment ul {
+      margin: 0.5rem 0 1.1rem 1.3rem;
+      font-size: 0.93rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-main);
+    }
+    .experiment ul li {
+      margin-bottom: 0.4rem;
+      line-height: 1.65;
+    }
+    .experiment ul li::marker {
+      color: var(--green-accent);
+    }
+
+    /* ── IMAGES ── */
+    .img-block {
+      margin: 1.4rem 0 1.8rem;
+      text-align: center;
+    }
+    .img-block img {
+      max-width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .img-caption {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.81rem;
+      color: var(--text-muted);
+      margin-top: 0.55rem;
+      font-style: italic;
+    }
+    .img-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.1rem;
+      margin: 1.4rem 0 1.8rem;
+    }
+    .img-row .img-block { margin: 0; }
+
+    /* ── LIMITATIONS ── */
+    .limitations-block {
+      background: var(--green-pale);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.8rem 2rem;
+      margin: 3rem 0 1rem;
+    }
+    .limitations-block h2 {
+      border-bottom-color: var(--border);
+    }
+    .limitations-list {
+      margin: 1.1rem 0 0 1.3rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.97rem;
+      color: var(--text-main);
+    }
+    .limitations-list li {
+      margin-bottom: 0.6rem;
+      line-height: 1.7;
+    }
+    .limitations-list li::marker {
+      color: var(--green-accent);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 2rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.82rem;
+      color: #6b8c7a;
+      border-top: 2px solid var(--green-light);
+      background: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-meta">[COURSE] · Rodrigo Sanchez Ocegueda · Multi-Agent Reinforcement Learning</div>
+    <h1>Multi-Agent Game Theory and Deep Q-Learning</h1>
+    <p>
+      How do two agents learn to compete — or cooperate — when neither knows what the other will do? This project
+      explores that question across three different environments, starting from exact game-theoretic solutions on
+      small discrete state spaces and moving toward neural approximations on continuous and larger discrete ones.
+      The experiments cover zero-sum games, cooperative-competitive settings, and entity-race dynamics, each
+      introducing a different challenge for multi-agent learning.
+    </p>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════ MAIN -->
+<div class="page-wrap">
+
+  <!-- ── OVERVIEW ── -->
+  <div class="overview-block">
+    <h2>Overview</h2>
+    <p class="overview-intro">
+      The implementations move from exact value-iteration methods toward neural Q-function approximators,
+      and from fully zero-sum games toward settings where agents have conflicting but partially coupled objectives.
+    </p>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">Discrete Car Game</div>
+        Two agents race to the center of a 5-by-5 grid. The state space is small enough to enumerate, so the
+        game is solved exactly using Q-iteration and stage-game Nash solvers without any neural network.
+      </div>
+      <div class="card">
+        <div class="card-label">Continuous Car Game</div>
+        The same competitive structure moves to a continuous unit square. A minimax DQN approximates Q-values
+        over all 16 joint actions, with an LRU cache storing solved stage games to avoid redundant computation.
+      </div>
+      <div class="card">
+        <div class="card-label">Dog Game</div>
+        Two players share a virtual dog defined by their midpoint and compete to steer it toward their own
+        house. Independent Q-networks learn without any game-theoretic solver; cooperation emerges through
+        the shared reward signal.
+      </div>
+      <div class="card">
+        <div class="card-label">Entity Race</div>
+        Two agents on an 8-by-8 grid race to capture randomly spawning entities. A single shared policy is
+        trained via self-play with perspective swapping, with the location of the next spawn visible to
+        both agents as part of the state.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ DISCRETE CAR GAME -->
+  <div class="game-section">
+    <div class="game-tag">Game 1</div>
+    <h2>Discrete Car Game</h2>
+    <p class="section-intro">
+      Two players move simultaneously on a 5-by-5 grid. Each turn, both choose one of four actions — up,
+      down, left, or right — and the result depends on both choices together. The goal for Player 1 is to
+      reach high-reward cells near the center while keeping Player 2 away from them. This is a zero-sum game:
+      any gain for Player 1 comes at an equal cost to Player 2.
+    </p>
+
+    <div class="spec-table-wrap">
+      <table class="spec-table">
+        <tr><td>Environment</td><td>A 5-by-5 discrete grid with 625 joint states (x1, y1, x2, y2). Both agents move simultaneously each step.</td></tr>
+        <tr><td>State</td><td>The full joint position of both players. Every (x1, y1, x2, y2) combination is a distinct state.</td></tr>
+        <tr><td>Actions</td><td>Each player chooses up, down, left, or right. Moves into the boundary are blocked and the player stays in place.</td></tr>
+        <tr><td>Reward</td><td>Spatial reward based on proximity to the center, minus a crash penalty of 10 when both players land on the same cell.</td></tr>
+      </table>
+    </div>
+
+  <div class="img-row">
+    <div class="img-block">
+      <img src="images/car_game_env.png" alt="Discrete car game grid showing spatial reward values" />
+      <div class="img-caption">Spatial reward values across the 5×5 grid. Cells closer to the center receive higher reward.</div>
+    </div>
+    <div class="img-block">
+      <img src="images/car_game_exploitability.png" alt="Nash exploitability convergence over Q-iterations" />
+      <div class="img-caption">Mean exploitability across all 625 states, plotted on a log scale over Q-iteration steps.</div>
+    </div>
+  </div>
+
+  <!-- Experiment 01 -->
+  <div class="experiment">
+    <div class="exp-header">
+      <span class="exp-number">01</span>
+      <h3>Q-Iteration with Nash Solvers</h3>
+    </div>
+    <p>
+      Because the state space is small enough to enumerate completely, the game can be solved with tabular
+      Q-iteration. At each state, the algorithm computes the 4-by-4 joint-action payoff matrix and then solves
+      the resulting stage game to extract a Nash equilibrium policy. Two solvers are used depending on the
+      structure of the game at that state: a saddle-point check for pure-strategy equilibria, and fictitious
+      play as a fallback for mixed-strategy cases.
+    </p>
+    <p>
+      The Q-values are updated using a standard Bellman backup with a discount factor of 0.9. After each full
+      pass over all states, the exploitability is measured as the maximum unilateral gain either player could
+      achieve by deviating from the current policy. Convergence is declared when the maximum change in V across
+      all states falls below 1e-6.
+    </p>
+    <ul>
+      <li>Enumerates all 625 joint states as (x1, y1, x2, y2) tuples and precomputes transitions and rewards offline.</li>
+      <li>Stores a 4-by-4 payoff matrix at each state; the Nash value becomes the Q-iteration backup target.</li>
+      <li>Searches for a pure saddle point first; falls back to 2,000 steps of fictitious play when none exists.</li>
+      <li>Tracks mean exploitability across all states at each iteration to measure convergence toward Nash equilibrium.</li>
+      <li>Policies are refreshed at each iteration rather than cached between passes, avoiding stale policy drift.</li>
+    </ul>
+
+    <div class="img-block">
+      <img src="images/car_game_vstar.png" alt="V* heatmap for Player 1 with P2 at different positions" />
+      <div class="img-caption">
+        V* values for Player 1 across all grid positions, with Player 2 fixed at three different locations.
+        Green cells are advantageous for Player 1; red cells favor Player 2.
+      </div>
+    </div>
+
+    <div class="img-block">
+      <img src="images/car_game_trajectories.png" alt="Nash equilibrium trajectories from four starting states" />
+      <div class="img-caption">
+        Nash equilibrium trajectories from four different starting configurations. Red arrows trace Player 1;
+        blue arrows trace Player 2. The gold star marks the center cell.
+      </div>
+    </div>
+
+    <p>
+      The Q-iteration approach is exact within the limits of the grid. Every state converges to a well-defined
+      Nash equilibrium, and the exploitability reaches near-zero within a small number of iterations. The main
+      constraint is that full state enumeration becomes impractical as the grid grows — on a 10-by-10 grid the
+      state space is already 10,000 joint positions, and the approach does not scale beyond that without
+      approximation.
+    </p>
+  </div>
+
+  <!-- Sample trajectory plots from existing outputs -->
+  <div class="experiment">
+    <div class="exp-header">
+      <span class="exp-number">02</span>
+      <h3>Trajectory Browser — State-Level Policy Visualization</h3>
+    </div>
+    <p>
+      Beyond the aggregate V* values, the solved policy was used to generate rollout trajectories from each
+      of the 625 starting states. The plots below show four representative cases, chosen to illustrate how
+      the Nash policy behaves when players start from symmetric, asymmetric, and near-center configurations.
+      Each trajectory runs for 20 steps under the solved mixed strategy.
+    </p>
+
+    <div class="img-row">
+      <div class="img-block">
+        <img src="images/car_q_corners_opposite.png" alt="Trajectory from opposite corners (0,0) vs (4,4)" />
+        <div class="img-caption">Start: P1 at (0,0), P2 at (4,4). Symmetric starting positions.</div>
+      </div>
+      <div class="img-block">
+        <img src="images/car_q_corners_crossed.png" alt="Trajectory from crossed corners (0,4) vs (4,0)" />
+        <div class="img-caption">Start: P1 at (0,4), P2 at (4,0). Agents cross diagonally toward the center.</div>
+      </div>
+    </div>
+    <div class="img-row">
+      <div class="img-block">
+        <img src="images/car_q_center_vs_corner.png" alt="Trajectory: center vs corner" />
+        <div class="img-caption">Start: P1 at (2,2) near center, P2 at (0,0). P1 holds a positional advantage.</div>
+      </div>
+      <div class="img-block">
+        <img src="images/car_q_near_center.png" alt="Trajectory: both near center" />
+        <div class="img-caption">Start: P1 at (1,1), P2 at (3,3). Both start close to center; collision pressure is higher.</div>
+      </div>
+    </div>
+  </div>
+
+
+  </div><!-- end game-section -->
+
+  <!-- ════════════════════════════════════════ CONTINUOUS CAR GAME -->
+  <div class="game-section">
+    <div class="game-tag">Game 2</div>
+    <h2>Continuous Car Game</h2>
+    <p class="section-intro">
+      The same zero-sum car game structure is extended to a continuous state space. Both players move inside
+      a unit square, the reward surface is still centered at (0.5, 0.5), and the game is still zero-sum. The
+      key difference is that the state space is no longer enumerable, so a neural network is needed to
+      approximate Q-values, and the Nash solver has to run at every training step rather than offline.
+    </p>
+
+    <div class="spec-table-wrap">
+      <table class="spec-table">
+        <tr><td>Environment</td><td>A continuous unit square [0,1]². Both agents move in discrete 4-directional steps of size 0.05 per action.</td></tr>
+        <tr><td>State</td><td>The four continuous coordinates (x1, y1, x2, y2) of both players. States are no longer enumerable.</td></tr>
+        <tr><td>Actions</td><td>Each player chooses up, down, left, or right. Moves are clipped to the boundary. 16 joint actions total.</td></tr>
+        <tr><td>Reward</td><td>Spatial reward proportional to proximity to the center, minus a crash penalty when Manhattan distance falls below 0.03.</td></tr>
+      </table>
+    </div>
+
+  <div class="img-block">
+    <img src="images/continuous_car_env.png" alt="Continuous car game reward landscape" />
+    <div class="img-caption">
+      The reward landscape for the continuous car game. Reward decreases linearly with Manhattan distance from
+      the center. Player 1 maximizes this value; Player 2 minimizes it.
+    </div>
+  </div>
+
+  <!-- Experiment 01 -->
+  <div class="experiment">
+    <div class="exp-header">
+      <span class="exp-number">01</span>
+      <h3>Minimax DQN with Stage-Game Caching</h3>
+    </div>
+    <p>
+      The network takes the four-dimensional state as input and outputs 16 Q-values, one for each joint action
+      pair. These are reshaped into a 4-by-4 matrix, and the Nash equilibrium of that matrix is solved to
+      extract both players' policies. Player 1's action is selected by maximizing the minimum value over
+      Player 2's response — a minimax criterion. The same fictitious play solver used in the discrete version
+      runs here, but now it runs on every training step during Bellman target computation.
+    </p>
+    <p>
+      Because solving the stage game is expensive and nearby continuous states often produce nearly identical
+      payoff matrices, solved game values are cached using an LRU cache keyed on states rounded to two decimal
+      places. This meaningfully reduces the number of solver calls during training without introducing
+      significant approximation error for the value target.
+    </p>
+    <ul>
+      <li>Network architecture: 4 inputs → 256 hidden (ReLU) → 256 hidden (ReLU) → 16 outputs.</li>
+      <li>Outputs reshape to a 4-by-4 joint-action payoff matrix; Nash value is extracted via fictitious play.</li>
+      <li>Minimax Bellman backup: y = r + γ · v_Nash(s'), where v_Nash is the solved equilibrium value of the next state.</li>
+      <li>LRU cache stores (rounded state → Nash value) to avoid re-solving identical or near-identical stage games.</li>
+      <li>Epsilon-greedy exploration decays from 1.0 to 0.05 over 15,000 steps; replay buffer capacity is 200,000 transitions.</li>
+      <li>Soft target network updates (τ = 0.1 Polyak averaging) applied every 2,000 steps to stabilize training.</li>
+    </ul>
+    <p>
+      The main practical limitation of this approach is speed. Solving a stage game at every Bellman backup
+      step is computationally heavy, and the cache provides only partial relief because the continuous state
+      space means many unique states are encountered even with rounding. Training is significantly slower
+      than standard DQN on the same hardware.
+    </p>
+  </div>
+
+
+  </div><!-- end game-section -->
+
+  <!-- ════════════════════════════════════════ DOG GAME -->
+  <div class="game-section">
+    <div class="game-tag">Game 3</div>
+    <h2>Dog Game</h2>
+    <p class="section-intro">
+      Two players share a virtual dog defined as the midpoint of their positions. Each player wants to steer
+      the dog toward their own house. This is not a pure zero-sum game: both players simultaneously control
+      the same object, so their actions are coupled through the dog's position even when their goals directly
+      conflict. The setting tests whether independent Q-learners can develop a reasonable policy in a
+      cooperative-competitive environment without any explicit game-theoretic machinery.
+    </p>
+
+    <div class="spec-table-wrap">
+      <table class="spec-table">
+        <tr><td>Environment</td><td>A continuous unit square. Two houses are fixed at (0.25, 0.25) and (0.75, 0.75). Episodes run for up to 200 steps.</td></tr>
+        <tr><td>State</td><td>An 8-dimensional vector: both players' (x, y) positions and both house positions. The dog midpoint is computed, not stored.</td></tr>
+        <tr><td>Actions</td><td>16 movement directions (8 angles × 2 step sizes: 0.05 large, 0.01 small) plus a stay action, for 17 total.</td></tr>
+        <tr><td>Reward</td><td>Each player receives the negative distance from the dog to their own house. Rewards are coupled: any movement by either player shifts the dog and changes both rewards.</td></tr>
+      </table>
+    </div>
+
+  <div class="img-row">
+    <div class="img-block">
+      <img src="images/dog_game_env.png" alt="Dog game environment diagram" />
+      <div class="img-caption">The dog is defined as the midpoint between the two players. Both houses are fixed; both players move to pull the midpoint toward their own target.</div>
+    </div>
+    <div class="img-block">
+      <img src="images/dog_game_loss.png" alt="Dog game training loss curve" />
+      <div class="img-caption">Training loss over 18,000 steps. The raw signal is noisy; the smoothed curve shows the overall downward trend.</div>
+    </div>
+  </div>
+
+  <!-- Experiment 01 -->
+  <div class="experiment">
+    <div class="exp-header">
+      <span class="exp-number">01</span>
+      <h3>Independent DQN</h3>
+    </div>
+    <p>
+      Each player gets its own Q-network and learns independently, without any joint-action matrix or
+      equilibrium solver. The networks take the 8-dimensional state as input and output Q-values for each of
+      the 17 individual actions. Training uses experience replay and hard target network syncs every 300
+      steps. Despite the lack of explicit coordination, both agents learn useful behavior because their
+      rewards are structurally linked through the dog's midpoint — whatever Player 1 does affects the dog's
+      position, which affects Player 2's reward, and vice versa.
+    </p>
+    <p>
+      The two-step-size action space (large and small movements) allows the agents to develop both coarse
+      repositioning and fine-grained adjustment behavior. In practice, the large steps tend to dominate early
+      in training, with the smaller adjustments appearing once the agents have learned the general direction
+      to pull the dog.
+    </p>
+    <ul>
+      <li>Two independent networks: 8 → 128 (ReLU) → 128 (ReLU) → 17, one per player.</li>
+      <li>Reward for each agent is the negative distance from the dog midpoint to that agent's house.</li>
+      <li>Hard target network sync every 300 steps; Smooth L1 loss with gradient clipping at 5.0.</li>
+      <li>Epsilon decays from 1.0 to 0.05 over the first 12,000 of 15,000 training steps.</li>
+      <li>Action decoding: index = direction_index × n_step_sizes + step_size_index, giving 16 directional actions plus stay.</li>
+      <li>Boundary handling clips movement to [0, 1]²; the stay action is always legal.</li>
+    </ul>
+    <p>
+      The independent learning setup scales much better than a joint Nash solver, but it gives up the
+      theoretical guarantee of converging to an equilibrium. The two agents are effectively training in a
+      non-stationary environment from each other's perspective, which can produce oscillating or suboptimal
+      coordination depending on the training trajectory.
+    </p>
+  </div>
+
+
+  </div><!-- end game-section -->
+
+  <!-- ════════════════════════════════════════ ENTITY RACE -->
+  <div class="game-section">
+    <div class="game-tag">Game 4</div>
+    <h2>Entity Race</h2>
+    <p class="section-intro">
+      Two agents on an 8-by-8 discrete grid race to capture a randomly spawning entity. Whoever reaches it
+      first scores a point; reaching it simultaneously gives half a point each. An episode ends when one
+      player reaches 10 points. Both agents can see where the entity will spawn next, which adds a
+      forward-planning dimension to the race: a player who is behind on the current entity might ignore it
+      and position for the next one instead.
+    </p>
+
+    <div class="spec-table-wrap">
+      <table class="spec-table">
+        <tr><td>Environment</td><td>An 8-by-8 grid. The entity spawns randomly, times out after 30 steps if uncaptured, then respawns. Episodes end at a score of 10.</td></tr>
+        <tr><td>State</td><td>A 10-dimensional normalized vector: both players' positions, the current entity position, the next spawn position, and both score fractions.</td></tr>
+        <tr><td>Actions</td><td>Five discrete actions: up, down, left, right, and stay. The step penalty makes staying strictly worse than moving in most situations.</td></tr>
+        <tr><td>Reward</td><td>+1 for capture, +0.5 for simultaneous capture. A score-gap penalty discourages runaway leads, and a small attraction reward encourages movement toward the nearest achievable target.</td></tr>
+      </table>
+    </div>
+
+  <div class="img-block">
+    <img src="images/entity_race_env.png" alt="Entity race environment on 8x8 grid" />
+    <div class="img-caption">
+      The 8-by-8 entity race environment. Both players can see the current entity (gold star) and the next
+      spawn location (purple star), which allows strategic repositioning between captures.
+    </div>
+  </div>
+
+  <!-- Experiment 01 -->
+  <div class="experiment">
+    <div class="exp-header">
+      <span class="exp-number">01</span>
+      <h3>Self-Play DQN with Perspective Swapping</h3>
+    </div>
+    <p>
+      Rather than training two separate networks, a single shared policy is trained from both players'
+      perspectives simultaneously. Before Player 2's state is fed to the network, the coordinates are
+      swapped so that the network always "sees" itself as the current player. This means the policy is
+      always trained to play as the stronger agent, which at equilibrium forces it to converge to a
+      symmetric Nash strategy: the only way to beat yourself is to play optimally.
+    </p>
+    <p>
+      One implementation issue that required careful handling is the treatment of capture events. Because
+      capture carries a large positive reward and terminates the current round, the Q-value at the
+      pre-capture state can inflate if the Bellman bootstrap is applied naively. The fix is to treat
+      capture as an absorbing transition and zero out the bootstrap term at that step, even when the
+      overall episode continues.
+    </p>
+    <ul>
+      <li>Single shared network: 10 → 256 (ReLU) → 256 (ReLU) → 5, trained from both players' swapped perspectives.</li>
+      <li>Perspective swap: (p1, p2, entity, next_entity, my_score, their_score) → (p2, p1, entity, next_entity, my_score, their_score).</li>
+      <li>Capture-as-terminal masking: bootstrap term is zeroed at capture transitions to prevent Q-value inflation.</li>
+      <li>Score-gap penalty (weight 0.5) reduces reward for the leading player and increases it for the trailing one, keeping the game competitive through the full episode.</li>
+      <li>Attraction reward (+0.1 per step) is active only when the agent is closer to the current entity, preventing it from rewarding futile chasing.</li>
+      <li>Hard target network sync every 200 steps; epsilon decays from 1.0 to 0.05 over the first 25,000 of 50,000 training steps.</li>
+    </ul>
+
+    <div class="img-block">
+      <img src="images/entity_race_loss.png" alt="Entity race training loss for Player 1 and Player 2" />
+      <div class="img-caption">
+        Training loss for both players over 40,000 steps. The raw signal is noisy due to the competitive
+        non-stationarity; the smoothed curves show both players stabilizing at comparable loss levels.
+      </div>
+    </div>
+
+    <p>
+      The shared policy approach guarantees that both players train with the same network capacity and the
+      same exploration schedule. In practice, the Nash gap — the difference in episode scores between the
+      two players — trends toward its minimum over training, which is consistent with convergence toward
+      a symmetric equilibrium. The main limitation is that perspective swapping only works for symmetric
+      games; any asymmetry in starting positions or reward structure would require separate networks.
+    </p>
+  </div>
+
+
+  </div><!-- end game-section -->
+
+  <!-- ════════════════════════════════════════ LIMITATIONS -->
+  <div class="limitations-block">
+    <div class="game-tag">Discussion</div>
+    <h2>Limitations</h2>
+    <p class="section-intro">
+      Each experiment works within its own scope, but together they show where the approaches start to break down.
+    </p>
+    <ul class="limitations-list">
+      <li>
+        The discrete car game solver is exact but does not scale. Full enumeration of the state space is
+        feasible on a 5-by-5 grid (625 states) but becomes impractical on a 10-by-10 grid, where the joint
+        state space grows to 10,000 entries and stage-game solves add another multiplicative cost.
+      </li>
+      <li>
+        The continuous car game solver is computationally expensive because the Nash stage game must be solved
+        at every Bellman backup. The LRU cache reduces this cost but does not eliminate it, and training is
+        noticeably slower than standard DQN on equivalent hardware.
+      </li>
+      <li>
+        The independent dog learners train in a non-stationary environment from each other's perspective,
+        since both networks update simultaneously. This means there is no convergence guarantee — the
+        joint policy can oscillate rather than settle at an equilibrium.
+      </li>
+      <li>
+        The self-play entity race setup converges toward a symmetric Nash strategy, but only for symmetric
+        games. Any structural asymmetry in reward, starting position, or action set would require separate
+        networks or a different training protocol.
+      </li>
+      <li>
+        None of the neural approaches include opponent modeling. Each agent treats its opponent's policy as
+        part of the environment rather than something to be reasoned about explicitly, which limits the
+        sophistication of the strategies that can emerge.
+      </li>
+    </ul>
+  </div><!-- end limitations-block -->
+
+</div><!-- end page-wrap -->
+
+<footer>
+  Rodrigo Sanchez Ocegueda &nbsp;·&nbsp; Multi-Agent Game Theory and Deep Q-Learning
+</footer>
+
+</body>
+</html>
