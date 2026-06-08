@@ -368,12 +368,15 @@
     <div class="header-left">
       <div class="header-course">CS298 &nbsp;·&nbsp; Multi-Agent Reinforcement Learning</div>
       <h1>Multi-Agent Game Theory and Deep Q-Learning</h1>
-      <div class="header-question">How do two agents learn to compete, or cooperate, when neither knows what the other will do?</div>
+      <div class="header-question">Does adding explicit Nash solvers to a Q-learning agent produce meaningfully better strategies than independent learning alone, and how far does that approach scale before approximation becomes necessary?</div>
       <p>
-        This project explores that question across three environments, moving from exact game-theoretic
-        solutions on small discrete state spaces to neural approximations on continuous and larger ones.
-        The experiments cover zero-sum games, cooperative-competitive settings, and competitive entity-race
-        dynamics, each introducing a different challenge for multi-agent learning.
+        The project tests four implementations across three environments. The first solves a small discrete
+        grid game exactly using Q-iteration and stage-game Nash solvers, which establishes a clean baseline
+        for what equilibrium play actually looks like. The next extends that same game to a continuous state
+        space where a neural network approximates Q-values and a minimax Bellman backup replaces the tabular
+        update. The last two shift away from pure zero-sum structure: one tests whether independent learners
+        can develop useful coordination through a shared reward signal alone, and the other looks at how
+        competitive behavior changes when both agents can see where the next target will appear.
       </p>
     </div>
     <div class="header-right">
