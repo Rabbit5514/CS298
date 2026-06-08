@@ -650,14 +650,15 @@
   <div class="experiment">
     <div class="exp-header">
       <span class="exp-number">01</span>
-      <h3>Self-Play DQN with Perspective Swapping</h3>
+      <h3>Independent DQN with Perspective Swapping</h3>
     </div>
     <p>
-      Rather than training two separate networks, a single shared policy is trained from both players'
-      perspectives simultaneously. Before Player 2's state is fed to the network, the coordinates are
-      swapped so that the network always "sees" itself as the current player. This means the policy is
-      always trained to play as the stronger agent, which at equilibrium forces it to converge to a
-      symmetric Nash strategy: the only way to beat yourself is to play optimally.
+      Each player has its own Q-network with separate weights and a separate optimizer. Both networks use
+      the same input format: before Player 2's state is fed to its network, the coordinates are swapped so
+      that both networks always see themselves as the active player. The key difference from a shared-weight
+      setup is that the two networks diverge freely during training, which allows genuinely asymmetric
+      strategies to emerge. One player might learn to chase the current entity aggressively while the other
+      learns to read the next spawn location and reposition early.
     </p>
     <p>
       One implementation issue that required careful handling is the treatment of capture events. Because
@@ -667,8 +668,9 @@
       overall episode continues.
     </p>
     <ul>
-      <li>Single shared network: 10 → 256 (ReLU) → 256 (ReLU) → 5, trained from both players' swapped perspectives.</li>
-      <li>Perspective swap: (p1, p2, entity, next_entity, my_score, their_score) → (p2, p1, entity, next_entity, my_score, their_score).</li>
+      <li>Two separate networks: 10 → 256 (ReLU) → 256 (ReLU) → 5, each with its own weights and Adam optimizer.</li>
+      <li>Perspective swap: Player 2's state has (p1, p2) coordinates exchanged before being fed to net2, keeping the input format consistent across both networks.</li>
+      <li>Each network is trained with its own independent backward pass; gradients from one player never affect the other's weights.</li>
       <li>Capture-as-terminal masking: bootstrap term is zeroed at capture transitions to prevent Q-value inflation.</li>
       <li>Score-gap penalty (weight 0.5) reduces reward for the leading player and increases it for the trailing one, keeping the game competitive through the full episode.</li>
       <li>Attraction reward (+0.1 per step) is active only when the agent is closer to the current entity, preventing it from rewarding futile chasing.</li>
@@ -678,17 +680,17 @@
     <div class="img-block">
       <img src="images/entity_race_loss.png" alt="Entity race training loss for Player 1 and Player 2" />
       <div class="img-caption">
-        Training loss for both players over 40,000 steps. The raw signal is noisy due to the competitive
-        non-stationarity; the smoothed curves show both players stabilizing at comparable loss levels.
+        Training loss for both players over 40,000 steps. The raw signal is noisy because each network
+        is training against a moving target; the smoothed curves show both networks stabilizing independently.
       </div>
     </div>
 
     <p>
-      The shared policy approach guarantees that both players train with the same network capacity and the
-      same exploration schedule. In practice, the Nash gap (the difference in episode scores between the
-      two players) trends toward its minimum over training, which is consistent with convergence toward
-      a symmetric equilibrium. The main limitation is that perspective swapping only works for symmetric
-      games; any asymmetry in starting positions or reward structure would require separate networks.
+      Using separate networks means neither player is constrained to mirror the other's strategy. The
+      tradeoff is that training is less stable compared to a shared-weight setup, since both networks
+      update simultaneously and each one is effectively learning in a non-stationary environment.
+      The rerouting behavior becomes genuinely meaningful here because one player doing it while the
+      other does not creates a real strategic difference that a shared policy would suppress by construction.
     </p>
   </div>
 
@@ -719,9 +721,9 @@
         joint policy can oscillate rather than settle at an equilibrium.
       </li>
       <li>
-        The self-play entity race setup converges toward a symmetric Nash strategy, but only for symmetric
-        games. Any structural asymmetry in reward, starting position, or action set would require separate
-        networks or a different training protocol.
+        The entity race uses two separate networks, which allows asymmetric strategies to emerge but makes
+        training less stable. Each network is learning against a moving target, so the joint policy can
+        oscillate rather than converge cleanly.
       </li>
       <li>
         None of the neural approaches include opponent modeling. Each agent treats its opponent's policy as
