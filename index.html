@@ -314,7 +314,7 @@
     <div class="header-meta">[COURSE] · Rodrigo Sanchez Ocegueda · Multi-Agent Reinforcement Learning</div>
     <h1>Multi-Agent Game Theory and Deep Q-Learning</h1>
     <p>
-      How do two agents learn to compete — or cooperate — when neither knows what the other will do? This project
+      How do two agents learn to compete, or cooperate, when neither knows what the other will do? This project
       explores that question across three different environments, starting from exact game-theoretic solutions on
       small discrete state spaces and moving toward neural approximations on continuous and larger discrete ones.
       The experiments cover zero-sum games, cooperative-competitive settings, and entity-race dynamics, each
@@ -364,8 +364,8 @@
     <div class="game-tag">Game 1</div>
     <h2>Discrete Car Game</h2>
     <p class="section-intro">
-      Two players move simultaneously on a 5-by-5 grid. Each turn, both choose one of four actions — up,
-      down, left, or right — and the result depends on both choices together. The goal for Player 1 is to
+      Two players move simultaneously on a 5-by-5 grid. Each turn, both choose one of four actions (up,
+      down, left, or right) and the result depends on both choices together. The goal for Player 1 is to
       reach high-reward cells near the center while keeping Player 2 away from them. This is a zero-sum game:
       any gain for Player 1 comes at an equal cost to Player 2.
     </p>
@@ -436,7 +436,7 @@
     <p>
       The Q-iteration approach is exact within the limits of the grid. Every state converges to a well-defined
       Nash equilibrium, and the exploitability reaches near-zero within a small number of iterations. The main
-      constraint is that full state enumeration becomes impractical as the grid grows — on a 10-by-10 grid the
+      constraint is that full state enumeration becomes impractical as the grid grows; on a 10-by-10 grid the
       state space is already 10,000 joint positions, and the approach does not scale beyond that without
       approximation.
     </p>
@@ -446,7 +446,7 @@
   <div class="experiment">
     <div class="exp-header">
       <span class="exp-number">02</span>
-      <h3>Trajectory Browser — State-Level Policy Visualization</h3>
+      <h3>Trajectory Browser: State-Level Policy Visualization</h3>
     </div>
     <p>
       Beyond the aggregate V* values, the solved policy was used to generate rollout trajectories from each
@@ -518,7 +518,7 @@
       The network takes the four-dimensional state as input and outputs 16 Q-values, one for each joint action
       pair. These are reshaped into a 4-by-4 matrix, and the Nash equilibrium of that matrix is solved to
       extract both players' policies. Player 1's action is selected by maximizing the minimum value over
-      Player 2's response — a minimax criterion. The same fictitious play solver used in the discrete version
+      Player 2's response, which is the minimax criterion. The same fictitious play solver used in the discrete version
       runs here, but now it runs on every training step during Bellman target computation.
     </p>
     <p>
@@ -589,7 +589,7 @@
       equilibrium solver. The networks take the 8-dimensional state as input and output Q-values for each of
       the 17 individual actions. Training uses experience replay and hard target network syncs every 300
       steps. Despite the lack of explicit coordination, both agents learn useful behavior because their
-      rewards are structurally linked through the dog's midpoint — whatever Player 1 does affects the dog's
+      rewards are structurally linked through the dog's midpoint; whatever Player 1 does affects the dog's
       position, which affects Player 2's reward, and vice versa.
     </p>
     <p>
@@ -685,8 +685,8 @@
 
     <p>
       The shared policy approach guarantees that both players train with the same network capacity and the
-      same exploration schedule. In practice, the Nash gap — the difference in episode scores between the
-      two players — trends toward its minimum over training, which is consistent with convergence toward
+      same exploration schedule. In practice, the Nash gap (the difference in episode scores between the
+      two players) trends toward its minimum over training, which is consistent with convergence toward
       a symmetric equilibrium. The main limitation is that perspective swapping only works for symmetric
       games; any asymmetry in starting positions or reward structure would require separate networks.
     </p>
@@ -715,7 +715,7 @@
       </li>
       <li>
         The independent dog learners train in a non-stationary environment from each other's perspective,
-        since both networks update simultaneously. This means there is no convergence guarantee — the
+        since both networks update simultaneously. This means there is no convergence guarantee; the
         joint policy can oscillate rather than settle at an equilibrium.
       </li>
       <li>
