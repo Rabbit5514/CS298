@@ -31,7 +31,7 @@
     header {
       background: var(--green-dark);
       color: #ffffff;
-      padding: 4rem 2rem 3.5rem;
+      padding: 0;
       position: relative;
     }
     header::after {
@@ -41,31 +41,85 @@
       background: linear-gradient(90deg, var(--green-accent), #52b788, var(--green-accent));
     }
     .header-inner {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 0;
+      align-items: stretch;
     }
-    .header-meta {
+    .header-left {
+      padding: 3.5rem 2.5rem 3.5rem 2rem;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .header-course {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: #95d5b2;
+      color: #52b788;
       margin-bottom: 1rem;
     }
     header h1 {
-      font-size: 2.6rem;
+      font-size: 2.2rem;
       font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 1.3rem;
+      line-height: 1.25;
+      margin-bottom: 1.2rem;
       font-family: 'Segoe UI', system-ui, sans-serif;
     }
+    .header-question {
+      font-size: 1.08rem;
+      color: #b7e4c7;
+      font-style: italic;
+      margin-bottom: 0.9rem;
+      font-family: Georgia, serif;
+      line-height: 1.6;
+    }
     header p {
-      font-size: 1.05rem;
-      color: #cde9d8;
-      max-width: 700px;
+      font-size: 0.95rem;
+      color: #a8d5b5;
       line-height: 1.8;
       font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .header-right {
+      padding: 2.5rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.6rem;
+      background: rgba(0,0,0,0.15);
+    }
+    .header-stat {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .header-stat-value {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #52b788;
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+    .header-stat-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #95d5b2;
+    }
+    .header-author {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.82rem;
+      color: #74c69d;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 1.2rem;
+      margin-top: auto;
+    }
+    .header-author strong {
+      display: block;
+      color: #d8f3dc;
+      font-size: 0.88rem;
+      margin-bottom: 0.15rem;
     }
 
     /* ── PAGE WRAPPER ── */
@@ -311,15 +365,35 @@
 <!-- ═══════════════════════════════════════════ HEADER -->
 <header>
   <div class="header-inner">
-    <div class="header-meta">[COURSE] · Rodrigo Sanchez Ocegueda · Multi-Agent Reinforcement Learning</div>
-    <h1>Multi-Agent Game Theory and Deep Q-Learning</h1>
-    <p>
-      How do two agents learn to compete, or cooperate, when neither knows what the other will do? This project
-      explores that question across three different environments, starting from exact game-theoretic solutions on
-      small discrete state spaces and moving toward neural approximations on continuous and larger discrete ones.
-      The experiments cover zero-sum games, cooperative-competitive settings, and entity-race dynamics, each
-      introducing a different challenge for multi-agent learning.
-    </p>
+    <div class="header-left">
+      <div class="header-course">CS298 &nbsp;·&nbsp; Multi-Agent Reinforcement Learning</div>
+      <h1>Multi-Agent Game Theory and Deep Q-Learning</h1>
+      <div class="header-question">How do two agents learn to compete, or cooperate, when neither knows what the other will do?</div>
+      <p>
+        This project explores that question across three environments, moving from exact game-theoretic
+        solutions on small discrete state spaces to neural approximations on continuous and larger ones.
+        The experiments cover zero-sum games, cooperative-competitive settings, and competitive entity-race
+        dynamics, each introducing a different challenge for multi-agent learning.
+      </p>
+    </div>
+    <div class="header-right">
+      <div class="header-stat">
+        <div class="header-stat-value">4</div>
+        <div class="header-stat-label">Experiments</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-value">3</div>
+        <div class="header-stat-label">Environments</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-value">625</div>
+        <div class="header-stat-label">States enumerated (discrete car game)</div>
+      </div>
+      <div class="header-author">
+        <strong>Rodrigo Sanchez Ocegueda</strong>
+        CS298 Final Project
+      </div>
+    </div>
   </div>
 </header>
 
